@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IR Relevant Feedback — Tiếng Việt</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ── Themes ─────────────────────────────────────────────────────────────── */
+:root { --t: 0.22s ease; }
+[data-theme="dark"] {
+  --bg:#0d0d14; --bg2:#13131f; --bg3:#1b1b2c; --bg4:#222236; --bg5:#2a2a42;
+  --border:rgba(255,255,255,0.07); --border2:rgba(255,255,255,0.12);
+  --text:#e0e0f0; --text2:#9090b8; --muted:#505070;
+  --accent:#7c6dfa; --accent2:#a78bfa; --pink:#f472b6;
+  --green:#10b981; --red:#f87171; --yellow:#fbbf24; --cyan:#22d3ee; --orange:#fb923c;
+  --shadow:0 4px 24px rgba(0,0,0,0.4);
+}
+[data-theme="light"] {
+  --bg:#f0f2fa; --bg2:#fff; --bg3:#f4f5ff; --bg4:#eaecfb; --bg5:#e0e3f8;
+  --border:rgba(0,0,0,0.07); --border2:rgba(0,0,0,0.13);
+  --text:#1a1a2e; --text2:#4a4a6a; --muted:#8888aa;
+  --accent:#5b4ee0; --accent2:#7c6dfa; --pink:#db2777;
+  --green:#059669; --red:#dc2626; --yellow:#d97706; --cyan:#0891b2; --orange:#ea580c;
+  --shadow:0 2px 16px rgba(0,0,0,0.09);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;transition:background var(--t),color var(--t)}
+[data-theme="dark"] body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:radial-gradient(ellipse 60% 50% at 10% 0%,rgba(124,109,250,.09) 0%,transparent 60%),
+             radial-gradient(ellipse 50% 40% at 90% 100%,rgba(244,114,182,.06) 0%,transparent 60%)}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+/* ── Header ─────────────────────────────────────────────────────────────── */
+header{height:56px;padding:0 28px;display:flex;align-items:center;gap:12px;
+  border-bottom:1px solid var(--border);background:var(--bg2);
+  position:sticky;top:0;z-index:100;box-shadow:var(--shadow);transition:background var(--t)}
+.logo{width:34px;height:34px;border-radius:9px;flex-shrink:0;font-size:17px;
+  background:linear-gradient(135deg,var(--accent),var(--pink));
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 2px 12px rgba(124,109,250,.4)}
+.logo-text h1{font-size:15px;font-weight:700}
+.logo-text p{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace}
+.header-mid{margin:0 auto;display:flex;gap:8px;align-items:center}
+.stat-chip{padding:3px 10px;border-radius:12px;font-size:10px;font-weight:600;
+  background:var(--bg3);border:1px solid var(--border);color:var(--text2);
+  font-family:'JetBrains Mono',monospace;transition:background var(--t)}
+.theme-btn{padding:5px 11px;border-radius:16px;cursor:pointer;border:1px solid var(--border2);
+  background:var(--bg3);color:var(--text2);font-size:12px;font-family:inherit;transition:all .2s}
+.theme-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+/* ── Layout ─────────────────────────────────────────────────────────────── */
+.app{display:grid;grid-template-columns:1fr 360px;gap:0;min-height:calc(100vh - 56px)}
+@media(max-width:1100px){.app{grid-template-columns:1fr}}
+.main-panel{padding:24px 28px;border-right:1px solid var(--border);overflow-y:auto}
+.side-panel{padding:20px;overflow-y:auto;background:var(--bg2);transition:background var(--t)}
+
+/* ── Search box ─────────────────────────────────────────────────────────── */
+.search-wrap{margin-bottom:24px}
+.search-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;
+  color:var(--muted);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.search-label::after{content:'';flex:1;height:1px;background:var(--border)}
+.search-box{display:flex;gap:10px;align-items:center}
+.search-input{flex:1;padding:12px 16px;border-radius:10px;font-size:14px;font-family:inherit;
+  background:var(--bg3);border:2px solid var(--border2);color:var(--text);
+  transition:border-color .2s,background var(--t)}
+.search-input:focus{outline:none;border-color:var(--accent)}
+.search-input::placeholder{color:var(--muted)}
+.btn{padding:11px 18px;border:none;border-radius:9px;font-family:inherit;font-size:13px;
+  font-weight:600;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px;white-space:nowrap}
+.btn-primary{background:linear-gradient(135deg,var(--accent),var(--pink));color:#fff;
+  box-shadow:0 3px 14px rgba(124,109,250,.35)}
+.btn-primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 5px 20px rgba(124,109,250,.5)}
+.btn-primary:disabled{opacity:.4;cursor:not-allowed}
+.btn-sm{padding:6px 12px;font-size:12px;border-radius:7px}
+.btn-ghost{background:var(--bg4);color:var(--text2);border:1px solid var(--border2)}
+.btn-ghost:hover{border-color:var(--accent);color:var(--accent)}
+
+/* ── Query tokens ───────────────────────────────────────────────────────── */
+.query-terms{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.qt{padding:3px 9px;border-radius:8px;font-size:11px;font-weight:600;
+  font-family:'JetBrains Mono',monospace;border:1px solid;
+  background:rgba(124,109,250,.1);color:var(--accent);border-color:rgba(124,109,250,.25)}
+.qt.new-term{background:rgba(16,185,129,.1);color:var(--green);border-color:rgba(16,185,129,.25)}
+
+/* ── Result controls ────────────────────────────────────────────────────── */
+.result-controls{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.result-count{font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace}
+.rf-actions{margin-left:auto;display:flex;gap:8px}
+.btn-rf{padding:8px 16px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;
+  font-family:inherit;transition:all .2s;border:1px solid;display:flex;align-items:center;gap:5px}
+.btn-apply-rf{background:rgba(16,185,129,.12);color:var(--green);border-color:rgba(16,185,129,.3)}
+.btn-apply-rf:hover{background:rgba(16,185,129,.22);transform:translateY(-1px)}
+.btn-apply-rf:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.btn-prf{background:rgba(34,211,238,.1);color:var(--cyan);border-color:rgba(34,211,238,.25)}
+.btn-prf:hover{background:rgba(34,211,238,.2)}
+.btn-reset{background:rgba(248,113,113,.1);color:var(--red);border-color:rgba(248,113,113,.25)}
+.btn-reset:hover{background:rgba(248,113,113,.2)}
+
+/* ── Result card ────────────────────────────────────────────────────────── */
+.result-list{display:flex;flex-direction:column;gap:10px}
+.result-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;
+  padding:16px;transition:all .2s,background var(--t);position:relative;overflow:hidden}
+.result-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
+  background:var(--border2);transition:background .2s}
+.result-card.rel::before{background:var(--green)}
+.result-card.non-rel::before{background:var(--red)}
+.result-card:hover{border-color:var(--border2);box-shadow:var(--shadow)}
+.card-top{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px}
+.rank-badge{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:800;font-family:'JetBrains Mono',monospace;flex-shrink:0;
+  background:var(--bg4);color:var(--muted)}
+.card-meta{flex:1;min-width:0}
+.card-title{font-size:13px;font-weight:600;margin-bottom:4px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card-title a{color:var(--text);text-decoration:none}
+.card-title a:hover{color:var(--accent)}
+.card-tags{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.domain-pill{padding:2px 8px;border-radius:8px;font-size:10px;font-weight:700}
+.score-chip{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);
+  padding:2px 7px;border-radius:6px;background:var(--bg4)}
+.card-snippet{font-size:12px;color:var(--text2);line-height:1.6;margin:8px 0}
+.card-footer{display:flex;align-items:center;gap:8px;margin-top:10px}
+.fb-btn{padding:5px 12px;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;
+  font-family:inherit;border:1px solid;transition:all .15s;display:flex;align-items:center;gap:4px}
+.fb-rel{background:rgba(16,185,129,.08);color:var(--green);border-color:rgba(16,185,129,.25)}
+.fb-rel:hover,.fb-rel.active{background:var(--green);color:#fff;border-color:var(--green)}
+.fb-nr{background:rgba(248,113,113,.08);color:var(--red);border-color:rgba(248,113,113,.25)}
+.fb-nr:hover,.fb-nr.active{background:var(--red);color:#fff;border-color:var(--red)}
+.fb-clear{background:var(--bg4);color:var(--muted);border-color:var(--border);font-size:10px;padding:5px 8px}
+.fb-clear:hover{border-color:var(--border2);color:var(--text2)}
+.card-url{margin-left:auto;font-size:10px;color:var(--accent);font-family:'JetBrains Mono',monospace;
+  text-decoration:none}
+.card-url:hover{text-decoration:underline}
+
+/* highlight changed rank */
+.rank-up .rank-badge{background:rgba(16,185,129,.2);color:var(--green)}
+.rank-down .rank-badge{background:rgba(248,113,113,.15);color:var(--red)}
+
+/* ── Empty / loading ────────────────────────────────────────────────────── */
+.empty{text-align:center;padding:60px 20px;color:var(--muted)}
+.empty svg{opacity:.25;margin-bottom:14px}
+.empty p{font-size:13px;line-height:1.7}
+.loading-bar{height:3px;background:linear-gradient(90deg,var(--accent),var(--pink));
+  border-radius:2px;animation:loading 1.2s ease-in-out infinite;display:none}
+@keyframes loading{0%{transform:scaleX(0) translateX(0)}50%{transform:scaleX(0.5) translateX(50%)}100%{transform:scaleX(0) translateX(200%)}}
+
+/* ── Side panel ─────────────────────────────────────────────────────────── */
+.side-section{margin-bottom:20px}
+.side-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;
+  color:var(--muted);margin-bottom:12px;display:flex;align-items:center;gap:7px}
+.side-title::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* Rocchio formula display */
+.formula-box{background:var(--bg3);border:1px solid var(--border);border-radius:10px;
+  padding:14px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.9;
+  transition:background var(--t)}
+.f-q{color:var(--accent)}
+.f-alpha{color:var(--yellow)}
+.f-beta{color:var(--green)}
+.f-gamma{color:var(--red)}
+.f-sum{color:var(--cyan)}
+.f-comment{color:var(--muted);font-size:10px}
+
+/* Params sliders */
+.param-row{margin-bottom:12px}
+.param-label{display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px}
+.param-label span:first-child{color:var(--text2);font-weight:500}
+.param-val{font-family:'JetBrains Mono',monospace;color:var(--accent);font-weight:700}
+input[type=range]{width:100%;accent-color:var(--accent);cursor:pointer;height:4px}
+
+/* Metrics */
+.metrics-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.metric-box{background:var(--bg3);border:1px solid var(--border);border-radius:9px;
+  padding:10px 12px;transition:background var(--t)}
+.metric-name{font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;
+  letter-spacing:.05em;font-family:'JetBrains Mono',monospace}
+.metric-vals{display:flex;align-items:center;gap:6px;margin-top:4px}
+.m-before{font-size:16px;font-weight:800;color:var(--text2)}
+.m-arrow{font-size:12px;color:var(--muted)}
+.m-after{font-size:16px;font-weight:800}
+.m-up{color:var(--green)}
+.m-down{color:var(--red)}
+.m-same{color:var(--text2)}
+.m-delta{font-size:10px;font-family:'JetBrains Mono',monospace;margin-top:2px}
+.m-delta.up{color:var(--green)}
+.m-delta.down{color:var(--red)}
+
+/* Round history */
+.round-item{background:var(--bg3);border:1px solid var(--border);border-radius:9px;
+  padding:11px;margin-bottom:8px;font-size:12px;transition:background var(--t)}
+.round-header{display:flex;justify-content:space-between;margin-bottom:6px}
+.round-num{font-weight:700;color:var(--accent);font-family:'JetBrains Mono',monospace}
+.round-fb{color:var(--muted)}
+.round-metric-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:5px}
+.rm{padding:2px 8px;border-radius:5px;font-size:10px;font-family:'JetBrains Mono',monospace;
+  background:var(--bg4);color:var(--text2)}
+.rm.up{background:rgba(16,185,129,.15);color:var(--green)}
+
+/* PRF section */
+.prf-box{background:var(--bg3);border:1px dashed var(--border2);border-radius:10px;
+  padding:14px;font-size:12px;color:var(--text2);line-height:1.7}
+
+/* Algorithm explain */
+.algo-steps{counter-reset:step}
+.algo-step{display:flex;gap:10px;margin-bottom:12px;font-size:12px;line-height:1.6}
+.step-num{width:22px;height:22px;border-radius:50%;background:var(--accent);color:#fff;
+  font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.step-txt{color:var(--text2)}
+.step-txt strong{color:var(--text)}
+
+/* New terms badge */
+.new-terms-row{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.nt{padding:2px 8px;border-radius:7px;font-size:10px;font-weight:700;
+  font-family:'JetBrains Mono',monospace;
+  background:rgba(16,185,129,.12);color:var(--green);border:1px solid rgba(16,185,129,.25)}
+
+/* Feedback counter */
+.fb-counter{display:flex;gap:8px;font-size:12px;font-family:'JetBrains Mono',monospace}
+.fbc{padding:3px 10px;border-radius:7px;font-weight:700}
+.fbc-r{background:rgba(16,185,129,.12);color:var(--green)}
+.fbc-nr{background:rgba(248,113,113,.12);color:var(--red)}
+
+/* Animations */
+@keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.fade-in{animation:fadeIn .25s ease forwards}
+@keyframes slideIn{from{opacity:0;transform:translateX(10px)}to{opacity:1;transform:translateX(0)}}
+.slide-in{animation:slideIn .3s ease forwards}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">🔎</div>
+  <div class="logo-text">
+    <h1>Vietnamese IR · Relevant Feedback</h1>
+    <p>BM25 + Rocchio Algorithm · port 5051</p>
+  </div>
+  <div class="header-mid">
+    <div class="stat-chip" id="hdr-docs">-- docs</div>
+    <div class="stat-chip" id="hdr-vocab">-- terms</div>
+    <div class="stat-chip" id="hdr-avgdl">avg -- tokens</div>
+  </div>
+  <button class="theme-btn" onclick="toggleTheme()" id="theme-btn">🌙 Dark</button>
+</header>
+
+<div class="app">
+
+  <!-- ── MAIN ─────────────────────────────────────────────────────────── -->
+  <div class="main-panel">
+
+    <!-- Search -->
+    <div class="search-wrap">
+      <div class="search-label">🔍 Câu truy vấn tiếng Việt</div>
+      <div class="search-box">
+        <input class="search-input" type="text" id="search-input"
+          placeholder="VD: trí tuệ nhân tạo ứng dụng, bệnh tiểu đường triệu chứng, biến đổi khí hậu..."
+          onkeydown="if(event.key==='Enter')doSearch()">
+        <button class="btn btn-primary" onclick="doSearch()" id="btn-search">🔍 Tìm kiếm</button>
+      </div>
+      <!-- Query terms visualization -->
+      <div class="query-terms" id="query-terms"></div>
+    </div>
+
+    <div class="loading-bar" id="loading-bar"></div>
+
+    <!-- Result controls -->
+    <div class="result-controls" id="result-controls" style="display:none">
+      <div>
+        <div class="result-count" id="result-count">0 kết quả</div>
+        <div class="fb-counter" id="fb-counter" style="margin-top:5px;display:none">
+          <span class="fbc fbc-r" id="cnt-r">0 Liên quan</span>
+          <span class="fbc fbc-nr" id="cnt-nr">0 Không liên quan</span>
+        </div>
+      </div>
+      <div class="rf-actions">
+        <button class="btn-rf btn-prf" onclick="doPseudoRF()" id="btn-prf" title="Tự động coi top-5 là liên quan">
+          🤖 Pseudo RF
+        </button>
+        <button class="btn-rf btn-apply-rf" onclick="doRocchio()" id="btn-rf" disabled>
+          ⚡ Áp dụng Rocchio
+        </button>
+        <button class="btn-rf btn-reset" onclick="resetSession()">↺ Reset</button>
+      </div>
+    </div>
+
+    <!-- Results -->
+    <div class="result-list" id="result-list">
+      <div class="empty">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+        </svg>
+        <p>Nhập câu truy vấn và nhấn <strong>Tìm kiếm</strong>.<br>
+        Sau đó đánh dấu các tài liệu <strong style="color:var(--green)">Liên quan / Không liên quan</strong><br>
+        và nhấn <strong style="color:var(--green)">Áp dụng Rocchio</strong> để cải thiện kết quả.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── SIDEBAR ───────────────────────────────────────────────────────── -->
+  <div class="side-panel">
+
+    <!-- Algorithm explanation -->
+    <div class="side-section">
+      <div class="side-title">📐 Rocchio Algorithm</div>
+      <div class="formula-box">
+        <div><span class="f-q">q<sub>m</sub></span> = <span class="f-alpha">α</span>·<span class="f-q">q<sub>0</sub></span> + <span class="f-beta">β</span>·<span class="f-sum">(1/|R|)·Σ d<sub>r</sub></span> − <span class="f-gamma">γ</span>·<span class="f-sum">(1/|NR|)·Σ d<sub>nr</sub></span></div>
+        <div style="margin-top:10px;font-size:10px">
+          <div><span class="f-q">q<sub>m</sub></span> <span class="f-comment">= Query mới sau phản hồi</span></div>
+          <div><span class="f-q">q<sub>0</sub></span> <span class="f-comment">= Query ban đầu</span></div>
+          <div><span class="f-alpha">α</span> <span class="f-comment">= Trọng số query gốc</span></div>
+          <div><span class="f-beta">β</span> <span class="f-comment">= Trọng số tài liệu liên quan</span></div>
+          <div><span class="f-gamma">γ</span> <span class="f-comment">= Trọng số tài liệu không liên quan</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Parameters -->
+    <div class="side-section">
+      <div class="side-title">⚙ Tham số Rocchio</div>
+      <div class="param-row">
+        <div class="param-label"><span>α (alpha) — Query gốc</span><span class="param-val" id="val-alpha">1.0</span></div>
+        <input type="range" min="0" max="2" step="0.05" value="1.0" id="sl-alpha" oninput="updateParam('alpha',this.value)">
+      </div>
+      <div class="param-row">
+        <div class="param-label"><span>β (beta) — Tài liệu liên quan</span><span class="param-val" id="val-beta">0.75</span></div>
+        <input type="range" min="0" max="2" step="0.05" value="0.75" id="sl-beta" oninput="updateParam('beta',this.value)">
+      </div>
+      <div class="param-row">
+        <div class="param-label"><span>γ (gamma) — Không liên quan</span><span class="param-val" id="val-gamma">0.15</span></div>
+        <input type="range" min="0" max="1" step="0.05" value="0.15" id="sl-gamma" oninput="updateParam('gamma',this.value)">
+      </div>
+    </div>
+
+    <!-- Metrics -->
+    <div class="side-section" id="metrics-section" style="display:none">
+      <div class="side-title">📊 Metrics (trước → sau)</div>
+      <div class="metrics-grid" id="metrics-grid"></div>
+      <div id="new-terms-section" style="margin-top:12px;display:none">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;font-weight:600">Từ mới trong query:</div>
+        <div class="new-terms-row" id="new-terms-list"></div>
+      </div>
+    </div>
+
+    <!-- Round history -->
+    <div class="side-section" id="history-section" style="display:none">
+      <div class="side-title">🕑 Lịch sử phản hồi</div>
+      <div id="round-history"></div>
+    </div>
+
+    <!-- Pseudo RF info -->
+    <div class="side-section">
+      <div class="side-title">🤖 Pseudo Relevance Feedback</div>
+      <div class="prf-box">
+        <strong style="color:var(--cyan)">PRF</strong> tự động coi <strong>top-5 kết quả</strong> là liên quan
+        và áp dụng Rocchio với <strong>β=0.5</strong>.<br><br>
+        Không cần đánh dấu thủ công — phù hợp khi user không muốn tương tác.
+        <div style="margin-top:10px;font-size:10px;color:var(--muted)">
+          ⚠ Nếu top-5 không liên quan → kết quả có thể tệ hơn (PRF drift).
+        </div>
+      </div>
+    </div>
+
+    <!-- How to use -->
+    <div class="side-section">
+      <div class="side-title">📖 Cách sử dụng</div>
+      <div class="algo-step"><span class="step-num">1</span><span class="step-txt">Nhập <strong>câu truy vấn</strong> tiếng Việt và nhấn Tìm kiếm</span></div>
+      <div class="algo-step"><span class="step-num">2</span><span class="step-txt">Đọc kết quả, nhấn <strong style="color:var(--green)">✓ Liên quan</strong> hoặc <strong style="color:var(--red)">✗ Không liên quan</strong></span></div>
+      <div class="algo-step"><span class="step-num">3</span><span class="step-txt">Nhấn <strong>⚡ Áp dụng Rocchio</strong> — query vector sẽ được điều chỉnh</span></div>
+      <div class="algo-step"><span class="step-num">4</span><span class="step-txt">Xem kết quả mới và <strong>Metrics</strong> so sánh trước/sau</span></div>
+      <div class="algo-step"><span class="step-num">5</span><span class="step-txt">Lặp lại nhiều vòng để cải thiện tiếp (iterative RF)</span></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+/* ── Theme ─────────────────────────────────────────────────────────────── */
+const root = document.documentElement;
+const themeBtn = document.getElementById('theme-btn');
+function toggleTheme(){
+  const d = root.getAttribute('data-theme')==='dark';
+  root.setAttribute('data-theme', d?'light':'dark');
+  themeBtn.textContent = d ? '🌙 Dark' : '☀ Light';
+  localStorage.setItem('ir-theme2', d?'light':'dark');
+}
+const saved = localStorage.getItem('ir-theme2')||'dark';
+root.setAttribute('data-theme', saved);
+themeBtn.textContent = saved==='dark'?'🌙 Dark':'☀ Light';
+
+/* ── State ─────────────────────────────────────────────────────────────── */
+let sessionId = null;
+let currentResults = [];
+let feedback = {};      // doc_id → "R" | "NR"
+let params = { alpha: 1.0, beta: 0.75, gamma: 0.15 };
+let roundNum = 0;
+let prevRanks = {};     // doc_id → old rank
+
+const DOMAIN_META = {
+  "Khoa học":        {bg:"rgba(99,102,241,.15)", text:"#818cf8"},
+  "Công nghệ":       {bg:"rgba(167,139,250,.15)",text:"#a78bfa"},
+  "Sức khỏe & Y tế":{bg:"rgba(244,114,182,.15)",text:"#f472b6"},
+  "Lịch sử":         {bg:"rgba(251,191,36,.15)", text:"#fbbf24"},
+  "Game & Giải trí": {bg:"rgba(16,185,129,.15)", text:"#34d399"},
+  "Môi trường":      {bg:"rgba(34,211,238,.15)", text:"#22d3ee"},
+  "Kinh tế & Xã hội":{bg:"rgba(251,146,60,.15)",text:"#fb923c"},
+};
+
+/* ── Init ──────────────────────────────────────────────────────────────── */
+(async () => {
+  const r = await fetch('/api/stats');
+  const d = await r.json();
+  document.getElementById('hdr-docs').textContent = d.total_docs.toLocaleString() + ' docs';
+  document.getElementById('hdr-vocab').textContent = d.vocab_size.toLocaleString() + ' terms';
+  document.getElementById('hdr-avgdl').textContent = 'avg ' + d.avg_dl + ' tokens';
+})();
+
+/* ── Params ────────────────────────────────────────────────────────────── */
+function updateParam(name, val) {
+  params[name] = parseFloat(val);
+  document.getElementById('val-' + name).textContent = parseFloat(val).toFixed(2);
+}
+
+/* ── Search ────────────────────────────────────────────────────────────── */
+async function doSearch() {
+  const query = document.getElementById('search-input').value.trim();
+  if (!query) return;
+
+  setLoading(true);
+  feedback = {}; prevRanks = {}; roundNum = 0;
+  clearMetrics(); clearHistory();
+
+  try {
+    const r = await fetch('/api/search', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ query, session_id: sessionId })
+    });
+    const d = await r.json();
+    if (d.error) { alert(d.error); return; }
+
+    sessionId = d.session_id;
+    currentResults = d.results;
+    prevRanks = {};
+    d.results.forEach(r => prevRanks[r.doc_id] = r.rank);
+
+    renderResults(d.results);
+    renderQueryTerms(d.query_terms, []);
+    updateFbCounter();
+    document.getElementById('result-count').textContent = `${d.total_results} kết quả — Round ${d.round}`;
+    document.getElementById('result-controls').style.display = 'flex';
+    document.getElementById('btn-rf').disabled = true;
+    document.getElementById('fb-counter').style.display = 'none';
+  } finally {
+    setLoading(false);
+  }
+}
+
+/* ── Rocchio RF ────────────────────────────────────────────────────────── */
+async function doRocchio() {
+  const r_ids = Object.keys(feedback).filter(k => feedback[k]==='R');
+  if (!r_ids.length) { alert('Hãy đánh dấu ít nhất 1 tài liệu là ✓ Liên quan'); return; }
+
+  setLoading(true);
+  try {
+    const r = await fetch('/api/feedback', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        session_id: sessionId, feedback,
+        alpha: params.alpha, beta: params.beta, gamma: params.gamma
+      })
+    });
+    const d = await r.json();
+    if (d.error) { alert(d.error); return; }
+
+    roundNum = d.round;
+    const oldRanks = {...prevRanks};
+    prevRanks = {};
+    d.results.forEach(r => prevRanks[r.doc_id] = r.rank);
+
+    currentResults = d.results;
+    renderResults(d.results, oldRanks);
+    renderQueryTerms(
+      d.round_summary.expanded_terms.map(t => ({term:t.term, weight:t.weight})),
+      d.new_terms
+    );
+    renderMetrics(d.metrics_before, d.metrics_after);
+    renderNewTerms(d.new_terms);
+    addRoundHistory(d.round_summary);
+
+    document.getElementById('result-count').textContent =
+      `${d.results.length} kết quả — Round ${d.round}`;
+    feedback = {};
+    updateFeedbackUI();
+    updateFbCounter();
+    document.getElementById('btn-rf').disabled = true;
+  } finally {
+    setLoading(false);
+  }
+}
+
+/* ── Pseudo RF ─────────────────────────────────────────────────────────── */
+async function doPseudoRF() {
+  if (!sessionId) { alert('Hãy tìm kiếm trước'); return; }
+  setLoading(true);
+  try {
+    const r = await fetch('/api/pseudo_rf', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ session_id: sessionId, top_k: 5, beta: 0.5 })
+    });
+    const d = await r.json();
+    const oldRanks = {...prevRanks};
+    prevRanks = {};
+    d.results.forEach(r => prevRanks[r.doc_id] = r.rank);
+    currentResults = d.results;
+    renderResults(d.results, oldRanks);
+    renderQueryTerms(d.expanded_terms.map(t=>({term:t.term,weight:t.weight})), d.new_terms);
+    renderMetrics(d.metrics_before, d.metrics_after);
+    renderNewTerms(d.new_terms);
+    document.getElementById('result-count').textContent = `${d.results.length} kết quả — Pseudo RF`;
+  } finally {
+    setLoading(false);
+  }
+}
+
+/* ── Reset ─────────────────────────────────────────────────────────────── */
+async function resetSession() {
+  if (sessionId) await fetch('/api/reset', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({session_id:sessionId})});
+  sessionId = null; feedback = {}; prevRanks = {}; roundNum = 0;
+  currentResults = [];
+  document.getElementById('result-list').innerHTML = `<div class="empty">
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+    <p>Session đã được reset. Nhập câu truy vấn mới.</p></div>`;
+  document.getElementById('result-controls').style.display = 'none';
+  document.getElementById('query-terms').innerHTML = '';
+  clearMetrics(); clearHistory();
+}
+
+/* ── Render results ────────────────────────────────────────────────────── */
+function renderResults(results, oldRanks={}) {
+  const list = document.getElementById('result-list');
+  if (!results.length) {
+    list.innerHTML = '<div class="empty"><p>Không tìm thấy kết quả.</p></div>';
+    return;
+  }
+  list.innerHTML = results.map(rec => {
+    const fb = feedback[rec.doc_id] || rec.user_feedback || '';
+    const m  = DOMAIN_META[rec.domain] || {bg:'rgba(100,100,120,.15)',text:'#aaa'};
+    const old = oldRanks[rec.doc_id];
+    let rankClass = '';
+    if (old) {
+      if (rec.rank < old) rankClass = 'rank-up';
+      else if (rec.rank > old) rankClass = 'rank-down';
+    }
+    const rankArrow = old && old!==rec.rank ? (rec.rank<old ? ` ↑${old-rec.rank}`:` ↓${rec.rank-old}`) : '';
+    return `<div class="result-card fade-in ${fb==='R'?'rel':fb==='NR'?'non-rel':''}" id="card-${rec.doc_id}">
+      <div class="card-top">
+        <div class="rank-badge ${rankClass}">#${rec.rank}${rankArrow}</div>
+        <div class="card-meta">
+          <div class="card-title"><a href="${rec.url}" target="_blank">${esc(rec.title)}</a></div>
+          <div class="card-tags">
+            <span class="domain-pill" style="background:${m.bg};color:${m.text}">${rec.domain}</span>
+            <span class="score-chip">BM25 ${rec.score}</span>
+            <span class="score-chip" title="Nhãn tự động (keyword overlap)">${relLabel(rec.auto_relevance)}</span>
+          </div>
+        </div>
+      </div>
+      <div class="card-snippet">${esc(rec.snippet)}</div>
+      <div class="card-footer">
+        <button class="fb-btn fb-rel ${fb==='R'?'active':''}" onclick="setFb(${rec.doc_id},'R',this)">✓ Liên quan</button>
+        <button class="fb-btn fb-nr  ${fb==='NR'?'active':''}" onclick="setFb(${rec.doc_id},'NR',this)">✗ Không liên quan</button>
+        <button class="fb-btn fb-clear" onclick="clearFb(${rec.doc_id})">✕</button>
+        <a class="card-url" href="${rec.url}" target="_blank">↗ Wikipedia</a>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ── Feedback handlers ─────────────────────────────────────────────────── */
+function setFb(docId, type, btn) {
+  feedback[String(docId)] = type;
+  const card = document.getElementById('card-' + docId);
+  card.className = 'result-card fade-in ' + (type==='R'?'rel':'non-rel');
+  card.querySelectorAll('.fb-btn.fb-rel,.fb-btn.fb-nr').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  updateFbCounter();
+  document.getElementById('btn-rf').disabled = !Object.values(feedback).includes('R');
+}
+
+function clearFb(docId) {
+  delete feedback[String(docId)];
+  const card = document.getElementById('card-' + docId);
+  card.className = 'result-card';
+  card.querySelectorAll('.fb-btn').forEach(b=>b.classList.remove('active'));
+  updateFbCounter();
+  document.getElementById('btn-rf').disabled = !Object.values(feedback).includes('R');
+}
+
+function updateFeedbackUI() {
+  currentResults.forEach(rec => {
+    const card = document.getElementById('card-' + rec.doc_id);
+    if (!card) return;
+    card.className = 'result-card';
+    card.querySelectorAll('.fb-btn').forEach(b=>b.classList.remove('active'));
+  });
+}
+
+function updateFbCounter() {
+  const nR  = Object.values(feedback).filter(v=>v==='R').length;
+  const nNR = Object.values(feedback).filter(v=>v==='NR').length;
+  const fc = document.getElementById('fb-counter');
+  if (nR+nNR > 0) {
+    fc.style.display='flex';
+    document.getElementById('cnt-r').textContent  = nR  + ' Liên quan';
+    document.getElementById('cnt-nr').textContent = nNR + ' Không liên quan';
+  } else {
+    fc.style.display='none';
+  }
+}
+
+/* ── Query terms ───────────────────────────────────────────────────────── */
+function renderQueryTerms(terms, newTerms=[]) {
+  const el = document.getElementById('query-terms');
+  const newSet = new Set(newTerms);
+  el.innerHTML = terms.map(({term, weight}) =>
+    `<span class="qt ${newSet.has(term)?'new-term':''}" title="weight: ${weight}">${term}</span>`
+  ).join('');
+}
+
+/* ── Metrics ───────────────────────────────────────────────────────────── */
+function renderMetrics(before, after) {
+  document.getElementById('metrics-section').style.display='block';
+  const grid = document.getElementById('metrics-grid');
+  const keys = Object.keys(before);
+  grid.innerHTML = keys.map(k => {
+    const b = before[k], a = after[k];
+    const diff = (a - b).toFixed(4);
+    const cls = a>b?'up':a<b?'down':'same';
+    const arrow = a>b?'↑':a<b?'↓':'→';
+    return `<div class="metric-box">
+      <div class="metric-name">${k}</div>
+      <div class="metric-vals">
+        <span class="m-before">${b}</span>
+        <span class="m-arrow">${arrow}</span>
+        <span class="m-after m-${cls}">${a}</span>
+      </div>
+      <div class="m-delta ${cls}">${a>=b?'+':''}${diff}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderNewTerms(terms) {
+  const sec = document.getElementById('new-terms-section');
+  const list = document.getElementById('new-terms-list');
+  if (!terms.length) { sec.style.display='none'; return; }
+  sec.style.display='block';
+  list.innerHTML = terms.map(t=>`<span class="nt">${t}</span>`).join('');
+}
+
+function clearMetrics() {
+  document.getElementById('metrics-section').style.display='none';
+  document.getElementById('metrics-grid').innerHTML='';
+  document.getElementById('new-terms-section').style.display='none';
+}
+
+/* ── History ───────────────────────────────────────────────────────────── */
+function addRoundHistory(summary) {
+  document.getElementById('history-section').style.display='block';
+  const el = document.getElementById('round-history');
+  const b = summary.metrics_before, a = summary.metrics_after;
+  const ap_up = a['AP'] > b['AP'];
+  const p5_up = a['P@5'] > b['P@5'];
+  el.innerHTML = `<div class="round-item slide-in">
+    <div class="round-header">
+      <span class="round-num">Round ${summary.round}</span>
+      <span class="round-fb">R:${summary.n_relevant} NR:${summary.n_non_relevant}</span>
+    </div>
+    <div style="font-size:11px;color:var(--muted)">α=${summary.alpha} β=${summary.beta} γ=${summary.gamma}</div>
+    <div class="round-metric-row">
+      <span class="rm ${p5_up?'up':''}">P@5: ${b['P@5']}→${a['P@5']}</span>
+      <span class="rm ${ap_up?'up':''}">AP: ${b['AP']}→${a['AP']}</span>
+      <span class="rm">nDCG@5: ${b['nDCG@5']}→${a['nDCG@5']}</span>
+    </div>
+  </div>` + el.innerHTML;
+}
+
+function clearHistory() {
+  document.getElementById('history-section').style.display='none';
+  document.getElementById('round-history').innerHTML='';
+}
+
+/* ── Helpers ───────────────────────────────────────────────────────────── */
+function setLoading(on) {
+  const bar = document.getElementById('loading-bar');
+  bar.style.display = on ? 'block' : 'none';
+  document.getElementById('btn-search').disabled = on;
+}
+
+function relLabel(r) {
+  const m = {1:'⚪ Non-rel', 2:'🟡 Partial', 3:'🟢 Relevant'};
+  return m[r] || '';
+}
+
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+</script>
+</body>
+</html>
