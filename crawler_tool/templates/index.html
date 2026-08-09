@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IR Dataset Crawler — Tiếng Việt</title>
+<meta name="description" content="Thu thập dữ liệu đa lĩnh vực tiếng Việt phục vụ nghiên cứu Truy hồi Thông tin">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ── Theme variables ─────────────────────────────────────────────────────── */
+:root {
+  --transition: 0.25s ease;
+}
+[data-theme="dark"] {
+  --bg:        #0d0d14;
+  --bg2:       #13131f;
+  --bg3:       #1c1c2e;
+  --bg4:       #252538;
+  --border:    rgba(255,255,255,0.08);
+  --border2:   rgba(255,255,255,0.14);
+  --text:      #e2e2f0;
+  --text2:     #a0a0c0;
+  --muted:     #5a5a80;
+  --accent:    #7c6dfa;
+  --accent2:   #a78bfa;
+  --green:     #10b981;
+  --red:       #f87171;
+  --yellow:    #fbbf24;
+  --cyan:      #22d3ee;
+  --orange:    #fb923c;
+  --pink:      #f472b6;
+  /* terminal */
+  --term-bg:   #020c02;
+  --term-text: #00ff41;
+  --term-dim:  #005014;
+  --term-warn: #ffcc00;
+  --term-err:  #ff3333;
+  --term-info: #00cfff;
+  --term-json: #ff9f43;
+  --card-shadow: 0 4px 24px rgba(0,0,0,0.4);
+}
+[data-theme="light"] {
+  --bg:        #f0f2fa;
+  --bg2:       #ffffff;
+  --bg3:       #f5f6ff;
+  --bg4:       #eaecfb;
+  --border:    rgba(0,0,0,0.08);
+  --border2:   rgba(0,0,0,0.14);
+  --text:      #1a1a2e;
+  --text2:     #4a4a6a;
+  --muted:     #8888aa;
+  --accent:    #6355e8;
+  --accent2:   #8b5cf6;
+  --green:     #059669;
+  --red:       #dc2626;
+  --yellow:    #d97706;
+  --cyan:      #0891b2;
+  --orange:    #ea580c;
+  --pink:      #db2777;
+  --term-bg:   #0a0f0a;
+  --term-text: #00e535;
+  --term-dim:  #003a0e;
+  --term-warn: #e6b800;
+  --term-err:  #ff2222;
+  --term-info: #00b8e6;
+  --term-json: #e68a00;
+  --card-shadow: 0 2px 16px rgba(0,0,0,0.1);
+}
+
+/* ── Reset ───────────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  transition: background var(--transition), color var(--transition);
+}
+
+/* ── Background ──────────────────────────────────────────────────────────── */
+[data-theme="dark"] body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(ellipse 70% 50% at 15% 0%, rgba(124,109,250,0.1) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 85% 100%, rgba(167,139,250,0.08) 0%, transparent 60%);
+}
+
+/* ── Header ──────────────────────────────────────────────────────────────── */
+header {
+  padding: 0 32px;
+  height: 60px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg2);
+  position: sticky; top: 0; z-index: 200;
+  display: flex; align-items: center; gap: 14px;
+  box-shadow: var(--card-shadow);
+  transition: background var(--transition), border-color var(--transition);
+}
+.logo {
+  width: 36px; height: 36px; border-radius: 9px; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--accent), var(--pink));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  box-shadow: 0 2px 12px rgba(124,109,250,0.4);
+}
+.logo-text h1 { font-size: 16px; font-weight: 700; letter-spacing: -0.3px; }
+.logo-text span { font-size: 11px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+
+.header-right { margin-left: auto; display: flex; gap: 10px; align-items: center; }
+
+/* Theme toggle */
+.theme-toggle {
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 12px; border-radius: 20px; cursor: pointer;
+  border: 1px solid var(--border2);
+  background: var(--bg3);
+  color: var(--text2); font-size: 13px; font-family: inherit;
+  transition: all .2s;
+  user-select: none;
+}
+.theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
+
+/* Status badge */
+.badge {
+  padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 700;
+  border: 1px solid; letter-spacing: 0.04em; display: flex; align-items: center; gap: 5px;
+}
+.badge-dot { width: 6px; height: 6px; border-radius: 50%; }
+.badge-idle    { color: var(--muted);  border-color: var(--muted);  background: transparent; }
+.badge-idle .badge-dot { background: var(--muted); }
+.badge-running { color: var(--green);  border-color: var(--green);  background: rgba(16,185,129,0.08); }
+.badge-running .badge-dot { background: var(--green); animation: pulse-dot 1.2s infinite; }
+.badge-done    { color: var(--accent); border-color: var(--accent); background: rgba(124,109,250,0.08); }
+.badge-done .badge-dot { background: var(--accent); }
+.badge-error   { color: var(--red);    border-color: var(--red);    background: rgba(248,113,113,0.08); }
+.badge-error .badge-dot { background: var(--red); }
+@keyframes pulse-dot { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.5);opacity:0.6} }
+
+/* ── Layout ──────────────────────────────────────────────────────────────── */
+.container { max-width: 1500px; margin: 0 auto; padding: 24px 28px; }
+.grid-main { display: grid; grid-template-columns: 320px 1fr; gap: 20px; }
+@media(max-width:1100px){ .grid-main { grid-template-columns: 1fr; } }
+
+/* ── Cards ───────────────────────────────────────────────────────────────── */
+.card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: var(--card-shadow);
+  transition: background var(--transition), border-color var(--transition), box-shadow var(--transition);
+}
+.card + .card { margin-top: 16px; }
+.section-label {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.12em; color: var(--muted); margin-bottom: 16px;
+  display: flex; align-items: center; gap: 7px;
+}
+.section-label::after {
+  content: ''; flex: 1; height: 1px; background: var(--border);
+}
+
+/* ── Form controls ───────────────────────────────────────────────────────── */
+.form-row { margin-bottom: 14px; }
+.form-label { display: block; font-size: 12px; color: var(--text2); margin-bottom: 5px; font-weight: 500; }
+input[type="number"] {
+  width: 100%; padding: 9px 13px; border-radius: 8px;
+  background: var(--bg3); border: 1px solid var(--border2);
+  color: var(--text); font-family: inherit; font-size: 14px;
+  transition: border-color .2s, background var(--transition);
+}
+input[type="number"]:focus { outline: none; border-color: var(--accent); }
+
+.checkbox-row { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+input[type="checkbox"] { width: 15px; height: 15px; accent-color: var(--accent); cursor: pointer; }
+.checkbox-row label { font-size: 13px; color: var(--text2); cursor: pointer; }
+
+/* ── Buttons ─────────────────────────────────────────────────────────────── */
+.btn {
+  width: 100%; padding: 11px; border: none; border-radius: 9px;
+  font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer;
+  transition: all .2s; display: flex; align-items: center; justify-content: center; gap: 7px;
+}
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent) 0%, var(--pink) 100%);
+  color: #fff;
+  box-shadow: 0 3px 16px rgba(124,109,250,0.35);
+}
+.btn-primary:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 5px 24px rgba(124,109,250,0.5); }
+.btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.btn-danger { background: rgba(248,113,113,0.1); color: var(--red); border: 1px solid rgba(248,113,113,0.25); }
+.btn-danger:hover:not(:disabled) { background: rgba(248,113,113,0.2); }
+.btn-danger:disabled { opacity: 0.35; cursor: not-allowed; }
+
+.btn-green  { background: rgba(16,185,129,0.1); color: var(--green);  border: 1px solid rgba(16,185,129,0.25); }
+.btn-green:hover  { background: rgba(16,185,129,0.2); }
+.btn-cyan   { background: rgba(34,211,238,0.1);  color: var(--cyan);   border: 1px solid rgba(34,211,238,0.25); }
+.btn-cyan:hover   { background: rgba(34,211,238,0.2); }
+
+.btn-row { display: flex; gap: 8px; margin-top: 8px; }
+.btn-row .btn { flex: 1; }
+
+/* ── Progress ring ───────────────────────────────────────────────────────── */
+.ring-wrap { display: flex; justify-content: center; padding: 16px 0; }
+.ring-wrap svg { transform: rotate(-90deg); filter: drop-shadow(0 0 10px rgba(124,109,250,0.3)); }
+.ring-bg { fill: none; stroke: var(--bg4); stroke-width: 9; }
+.ring-fg {
+  fill: none; stroke: url(#ringGrad); stroke-width: 9;
+  stroke-linecap: round;
+  stroke-dasharray: 326; stroke-dashoffset: 326;
+  transition: stroke-dashoffset 0.7s cubic-bezier(.4,0,.2,1);
+}
+.ring-container { position: relative; display: inline-flex; align-items: center; justify-content: center; }
+.ring-inner { position: absolute; text-align: center; }
+.ring-pct { font-size: 24px; font-weight: 800; letter-spacing: -1px; }
+.ring-sub { font-size: 10px; color: var(--muted); margin-top: 1px; font-family: 'JetBrains Mono', monospace; }
+
+/* ── Stats ───────────────────────────────────────────────────────────────── */
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.stat-box {
+  background: var(--bg3); border: 1px solid var(--border); border-radius: 9px; padding: 11px 13px;
+  transition: background var(--transition);
+}
+.stat-val { font-size: 20px; font-weight: 800; font-family: 'JetBrains Mono', monospace; }
+.stat-lbl { font-size: 10px; color: var(--muted); margin-top: 2px; letter-spacing: 0.03em; }
+
+/* ── Domain bars ─────────────────────────────────────────────────────────── */
+.domain-item { margin-bottom: 10px; }
+.domain-header { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px; }
+.domain-name { font-weight: 500; }
+.domain-count { color: var(--muted); font-family: 'JetBrains Mono', monospace; font-size: 11px; }
+.bar-track { height: 5px; border-radius: 3px; background: var(--bg4); overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 3px; transition: width 0.8s cubic-bezier(.4,0,.2,1); }
+
+/* ── TERMINAL LOG ────────────────────────────────────────────────────────── */
+.terminal-card {
+  background: var(--term-bg);
+  border: 1px solid #1a4d1a;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px #002800, 0 8px 32px rgba(0,255,65,0.08), inset 0 0 60px rgba(0,40,0,0.3);
+}
+.terminal-titlebar {
+  display: flex; align-items: center; gap: 8px;
+  padding: 9px 14px;
+  background: #010d01;
+  border-bottom: 1px solid #0e2e0e;
+}
+.term-dot { width: 11px; height: 11px; border-radius: 50%; }
+.term-dot.red    { background: #ff5f57; }
+.term-dot.yellow { background: #ffbd2e; }
+.term-dot.green  { background: #28c840; }
+.terminal-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; color: #2a6a2a; margin-left: 6px; letter-spacing: 0.05em;
+}
+.terminal-body {
+  padding: 14px;
+  height: 280px;
+  overflow-y: auto;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11.5px;
+  line-height: 1.65;
+  color: var(--term-text);
+  /* scanline effect */
+  background-image: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,255,65,0.015) 2px,
+    rgba(0,255,65,0.015) 4px
+  );
+}
+.terminal-body::-webkit-scrollbar { width: 4px; }
+.terminal-body::-webkit-scrollbar-track { background: transparent; }
+.terminal-body::-webkit-scrollbar-thumb { background: #003a10; border-radius: 2px; }
+
+.log-line { display: flex; gap: 0; }
+.log-ts { color: #005a18; flex-shrink: 0; width: 80px; }
+.log-prefix { color: #007a20; flex-shrink: 0; width: 70px; }
+.log-msg { word-break: break-word; }
+.log-ok   .log-msg { color: var(--term-text); }
+.log-warn .log-msg { color: var(--term-warn); }
+.log-err  .log-msg { color: var(--term-err); }
+.log-info .log-msg { color: var(--term-info); }
+.log-json .log-msg { color: var(--term-json); }
+.log-sys  .log-msg { color: #00aa33; }
+
+/* Cursor blink on last line */
+.terminal-cursor {
+  display: inline-block; width: 7px; height: 13px;
+  background: var(--term-text); vertical-align: middle; margin-left: 3px;
+  animation: blink-cursor 1s step-end infinite;
+}
+@keyframes blink-cursor { 0%,100%{opacity:1} 50%{opacity:0} }
+
+/* ── Right panel ─────────────────────────────────────────────────────────── */
+.right-panel { display: flex; flex-direction: column; gap: 16px; }
+
+/* ── Filter row ──────────────────────────────────────────────────────────── */
+.filter-row { display: flex; gap: 10px; flex-wrap: wrap; }
+.filter-input {
+  flex: 1; min-width: 180px;
+  padding: 8px 13px; border-radius: 8px;
+  background: var(--bg3); border: 1px solid var(--border2);
+  color: var(--text); font-family: inherit; font-size: 13px;
+  transition: border-color .2s, background var(--transition);
+}
+.filter-input:focus { outline: none; border-color: var(--accent); }
+.filter-select {
+  padding: 8px 13px; border-radius: 8px;
+  background: var(--bg3); border: 1px solid var(--border2);
+  color: var(--text); font-family: inherit; font-size: 13px; cursor: pointer;
+  transition: background var(--transition);
+}
+.filter-select:focus { outline: none; border-color: var(--accent); }
+
+/* ── Table ───────────────────────────────────────────────────────────────── */
+.table-wrap {
+  overflow-x: auto; border-radius: 10px;
+  border: 1px solid var(--border);
+  transition: border-color var(--transition);
+}
+table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+thead th {
+  background: var(--bg3); padding: 11px 14px;
+  text-align: left; font-weight: 600; color: var(--muted);
+  font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em;
+  white-space: nowrap;
+  transition: background var(--transition);
+}
+tbody tr { border-top: 1px solid var(--border); transition: background .12s; }
+tbody tr:hover { background: var(--bg4); }
+tbody td { padding: 9px 14px; vertical-align: top; }
+.td-id { color: var(--muted); font-family: 'JetBrains Mono', monospace; font-size: 10px; white-space: nowrap; }
+.pill {
+  display: inline-block; padding: 2px 9px; border-radius: 10px;
+  font-size: 10px; font-weight: 700; white-space: nowrap; letter-spacing: 0.02em;
+}
+.td-title { font-weight: 500; max-width: 200px; font-size: 12px; }
+.td-query { color: var(--text2); font-size: 11px; max-width: 180px; font-family: 'JetBrains Mono', monospace; }
+.td-snippet { color: var(--text2); font-size: 11.5px; max-width: 280px; line-height: 1.55; }
+.td-rel { text-align: center; }
+.rel-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 26px; height: 26px; border-radius: 8px; font-size: 11px; font-weight: 800;
+  font-family: 'JetBrains Mono', monospace;
+}
+.rel-1 { background: rgba(248,113,113,0.12); color: var(--red); }
+.rel-2 { background: rgba(251,191,36,0.12);  color: var(--yellow); }
+.rel-3 { background: rgba(16,185,129,0.12);  color: var(--green); }
+.td-url a { color: var(--accent); font-size: 11px; text-decoration: none; font-family: 'JetBrains Mono', monospace; }
+.td-url a:hover { text-decoration: underline; }
+
+/* ── Pagination ──────────────────────────────────────────────────────────── */
+.pagination { display: flex; gap: 5px; align-items: center; justify-content: center; flex-wrap: wrap; }
+.page-btn {
+  padding: 5px 11px; border-radius: 7px;
+  background: var(--bg3); border: 1px solid var(--border);
+  color: var(--text2); cursor: pointer; font-family: inherit; font-size: 12px;
+  transition: all .15s;
+}
+.page-btn:hover { border-color: var(--accent); color: var(--accent); }
+.page-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+.page-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.page-info { font-size: 11px; color: var(--muted); font-family: 'JetBrains Mono', monospace; padding: 0 6px; }
+
+/* ── Empty state ─────────────────────────────────────────────────────────── */
+.empty-state { text-align: center; padding: 50px 20px; color: var(--muted); }
+.empty-state p { font-size: 13px; margin-top: 12px; }
+
+/* ── Schema ──────────────────────────────────────────────────────────────── */
+.schema-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px; margin-top: 14px;
+}
+.schema-field {
+  background: var(--bg3); border-radius: 9px; padding: 12px;
+  border-left: 3px solid var(--accent);
+  transition: background var(--transition);
+}
+.schema-field .fname { font-size: 11px; font-weight: 700; color: var(--accent); font-family: 'JetBrains Mono', monospace; }
+.schema-field .fdesc { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+/* ── Animations ──────────────────────────────────────────────────────────── */
+@keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+.fade-in { animation: fadeIn .25s ease forwards; }
+
+/* ── Scrollbar global ────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- ── Header ──────────────────────────────────────────────────────────── -->
+<header>
+  <div class="logo">🔍</div>
+  <div class="logo-text">
+    <h1>IR Dataset Crawler</h1>
+    <span>vi.wikipedia.org · relevant feedback · TREC/CLEF</span>
+  </div>
+  <div class="header-right">
+    <span id="status-badge" class="badge badge-idle">
+      <span class="badge-dot"></span> IDLE
+    </span>
+    <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn" title="Chuyển đổi giao diện">
+      🌙 Dark
+    </button>
+  </div>
+</header>
+
+<div class="container">
+  <div class="grid-main">
+
+    <!-- ── LEFT sidebar ─────────────────────────────────────────────────── -->
+    <aside>
+
+      <!-- Config -->
+      <div class="card">
+        <div class="section-label">⚙ Cấu hình</div>
+        <div class="form-row">
+          <label class="form-label" for="inp-target">Số tài liệu mục tiêu</label>
+          <input type="number" id="inp-target" value="1500" min="100" max="5000" step="100">
+        </div>
+        <div class="form-row">
+          <div class="checkbox-row">
+            <input type="checkbox" id="chk-resume" checked>
+            <label for="chk-resume">Tiếp tục (Resume) từ data cũ</label>
+          </div>
+        </div>
+        <button class="btn btn-primary" id="btn-start" onclick="startCrawl()">
+          <span>▶</span> Bắt đầu thu thập
+        </button>
+        <div class="btn-row">
+          <button class="btn btn-danger" id="btn-stop" onclick="stopCrawl()" disabled>⏹ Dừng</button>
+        </div>
+
+        <!-- Ring -->
+        <div class="ring-wrap" style="margin-top:18px">
+          <div class="ring-container">
+            <svg width="110" height="110" viewBox="0 0 110 110">
+              <defs>
+                <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#7c6dfa"/>
+                  <stop offset="50%" stop-color="#f472b6"/>
+                  <stop offset="100%" stop-color="#10b981"/>
+                </linearGradient>
+              </defs>
+              <circle class="ring-bg" cx="55" cy="55" r="48"/>
+              <circle class="ring-fg" id="ring-fg" cx="55" cy="55" r="48" style="stroke-dasharray:301.6;stroke-dashoffset:301.6"/>
+            </svg>
+            <div class="ring-inner">
+              <div class="ring-pct" id="ring-pct">0%</div>
+              <div class="ring-sub" id="ring-sub">0 / 1500</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid">
+          <div class="stat-box">
+            <div class="stat-val" id="st-total">0</div>
+            <div class="stat-lbl">DOCS</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-val" id="st-domains">0</div>
+            <div class="stat-lbl">DOMAINS</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-val" id="st-speed">0</div>
+            <div class="stat-lbl">DOC/MIN</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-val" id="st-eta">--</div>
+            <div class="stat-lbl">ETA</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Domain distribution -->
+      <div class="card">
+        <div class="section-label">📊 Phân bố lĩnh vực</div>
+        <div id="domain-bars"><span style="font-size:12px;color:var(--muted)">Chưa có dữ liệu</span></div>
+      </div>
+
+      <!-- Export -->
+      <div class="card">
+        <div class="section-label">⬇ Xuất dữ liệu</div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:12px;line-height:1.6">
+          XLSX gồm 3 sheet: <strong style="color:var(--text2)">Dataset</strong> · <strong style="color:var(--text2)">Thống kê</strong> · <strong style="color:var(--text2)">IR qrel</strong>
+        </div>
+        <button class="btn btn-green" onclick="exportXLSX()">📊 Xuất XLSX (3 sheets)</button>
+        <div class="btn-row">
+          <button class="btn btn-cyan" onclick="exportJSON()">{} Xuất JSON</button>
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- ── RIGHT panel ───────────────────────────────────────────────────── -->
+    <div class="right-panel">
+
+      <!-- Terminal log -->
+      <div class="terminal-card">
+        <div class="terminal-titlebar">
+          <span class="term-dot red"></span>
+          <span class="term-dot yellow"></span>
+          <span class="term-dot green"></span>
+          <span class="terminal-title">ir-crawler@localhost ~ $ python app.py --target 1500</span>
+        </div>
+        <div class="terminal-body" id="term-body">
+          <div class="log-line log-sys">
+            <span class="log-ts">00:00:00</span>
+            <span class="log-prefix">[SYS]</span>
+            <span class="log-msg">IR Dataset Crawler v2.0 — Wikipedia Tiếng Việt</span>
+          </div>
+          <div class="log-line log-sys">
+            <span class="log-ts">00:00:00</span>
+            <span class="log-prefix">[SYS]</span>
+            <span class="log-msg">Domains: Khoa học · Công nghệ · Y tế · Lịch sử · Game · Môi trường · Kinh tế</span>
+          </div>
+          <div class="log-line log-info">
+            <span class="log-ts">00:00:00</span>
+            <span class="log-prefix">[INFO]</span>
+            <span class="log-msg">Sẵn sàng. Nhấn "Bắt đầu thu thập" để khởi động crawler.<span class="terminal-cursor"></span></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Data table -->
+      <div class="card">
+        <div class="section-label">
+          📄 Dữ liệu thu thập
+          <span id="total-lbl" style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent);margin-left:4px;text-transform:none;letter-spacing:0">[0 records]</span>
+        </div>
+        <div class="filter-row" style="margin-bottom:14px">
+          <input class="filter-input" type="text" id="filter-q" placeholder="🔍 Tìm tiêu đề hoặc query..." oninput="debounceFilter()">
+          <select class="filter-select" id="filter-domain" onchange="filterAndLoad()">
+            <option value="">All domains</option>
+            {% for domain in domains %}
+            <option value="{{ domain }}">{{ domain }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Domain</th>
+                <th>Tiêu đề</th>
+                <th>Query</th>
+                <th>Nội dung</th>
+                <th title="1=Non-relevant, 2=Partial, 3=Highly relevant">Rel.</th>
+                <th>URL</th>
+              </tr>
+            </thead>
+            <tbody id="table-body">
+              <tr><td colspan="7">
+                <div class="empty-state">
+                  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.3"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                  <p>Chưa có dữ liệu. Bắt đầu crawl để thu thập.</p>
+                </div>
+              </td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="pagination" id="pagination" style="margin-top:14px"></div>
+      </div>
+
+      <!-- Schema -->
+      <div class="card">
+        <div class="section-label">📐 IR Relevant Feedback Schema</div>
+        <p style="font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:0">
+          Theo chuẩn <strong style="color:var(--text2)">TREC/CLEF qrel</strong> — mỗi cặp
+          <code style="background:var(--bg4);padding:1px 5px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:11px">(query_id, doc_id, relevance)</code>
+          dùng để huấn luyện/đánh giá mô hình Phản hồi liên quan tiếng Việt.
+        </p>
+        <div class="schema-grid">
+          <div class="schema-field"><div class="fname">query_id</div><div class="fdesc">Q0001 … Q9999</div></div>
+          <div class="schema-field"><div class="fname">query_text</div><div class="fdesc">Câu truy vấn tiếng Việt</div></div>
+          <div class="schema-field"><div class="fname">doc_id</div><div class="fdesc">D00001 … D99999</div></div>
+          <div class="schema-field"><div class="fname">doc_title</div><div class="fdesc">Tiêu đề bài Wikipedia</div></div>
+          <div class="schema-field"><div class="fname">relevance_label</div><div class="fdesc">1 / 2 / 3 (auto + manual)</div></div>
+          <div class="schema-field"><div class="fname">feedback_type</div><div class="fdesc">Non / Partial / Highly</div></div>
+          <div class="schema-field"><div class="fname">domain</div><div class="fdesc">Lĩnh vực bài viết</div></div>
+          <div class="schema-field"><div class="fname">note</div><div class="fdesc">Ghi chú (để trống)</div></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── Theme ───────────────────────────────────────────────────────────────── */
+const root = document.documentElement;
+const themeBtn = document.getElementById('theme-btn');
+
+function toggleTheme() {
+  const isDark = root.getAttribute('data-theme') === 'dark';
+  root.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  themeBtn.textContent = isDark ? '🌙 Dark' : '☀ Light';
+  localStorage.setItem('ir-theme', isDark ? 'light' : 'dark');
+}
+// Restore saved theme
+const savedTheme = localStorage.getItem('ir-theme') || 'dark';
+root.setAttribute('data-theme', savedTheme);
+themeBtn.textContent = savedTheme === 'dark' ? '🌙 Dark' : '☀ Light';
+
+/* ── State ───────────────────────────────────────────────────────────────── */
+let currentPage = 1, perPage = 20, totalRecords = 0;
+let isRunning = false, evtSource = null;
+let speedSamples = [], lastCount = 0, lastTime = Date.now();
+let filterDebounce = null, docCount = 0;
+const CIRC = 2 * Math.PI * 48; // ring circumference
+
+const DOMAIN_META = {
+  "Khoa học":         { bg:"rgba(99,102,241,0.15)",   text:"#818cf8",  bar:"#818cf8"  },
+  "Công nghệ":        { bg:"rgba(167,139,250,0.15)",  text:"#a78bfa",  bar:"#a78bfa"  },
+  "Sức khỏe & Y tế": { bg:"rgba(244,114,182,0.15)",  text:"#f472b6",  bar:"#f472b6"  },
+  "Lịch sử":          { bg:"rgba(251,191,36,0.15)",   text:"#fbbf24",  bar:"#fbbf24"  },
+  "Game & Giải trí":  { bg:"rgba(16,185,129,0.15)",   text:"#34d399",  bar:"#34d399"  },
+  "Môi trường":       { bg:"rgba(34,211,238,0.15)",   text:"#22d3ee",  bar:"#22d3ee"  },
+  "Kinh tế & Xã hội": { bg:"rgba(251,146,60,0.15)",  text:"#fb923c",  bar:"#fb923c"  },
+};
+
+/* ── Terminal log ────────────────────────────────────────────────────────── */
+function termLog(msg, type = 'ok', isJson = false) {
+  const body = document.getElementById('term-body');
+  // Remove cursor from last line
+  body.querySelectorAll('.terminal-cursor').forEach(c => c.remove());
+
+  const now = new Date();
+  const ts = now.toTimeString().slice(0, 8);
+  const prefixMap = { ok:'[RECV]', warn:'[WARN]', err:'[ERR ]', info:'[INFO]', json:'[JSON]', sys:'[SYS ]' };
+
+  const line = document.createElement('div');
+  line.className = `log-line log-${type}`;
+
+  if (isJson) {
+    // Pretty print abbreviated JSON
+    let display = msg;
+    try {
+      const obj = typeof msg === 'string' ? JSON.parse(msg) : msg;
+      const mini = { id: obj.id, domain: obj.domain, title: (obj.title||'').slice(0,30), rel: obj.relevance, words: obj.word_count };
+      display = JSON.stringify(mini);
+    } catch(e) {}
+    line.innerHTML = `<span class="log-ts">${ts}</span><span class="log-prefix">${prefixMap.json}</span><span class="log-msg">${esc(display)}</span>`;
+  } else {
+    line.innerHTML = `<span class="log-ts">${ts}</span><span class="log-prefix">${prefixMap[type]||'[    ]'}</span><span class="log-msg">${esc(String(msg))}</span>`;
+  }
+
+  // Add cursor to this line
+  const cursor = document.createElement('span');
+  cursor.className = 'terminal-cursor';
+  line.querySelector('.log-msg').appendChild(cursor);
+
+  body.appendChild(line);
+  body.scrollTop = body.scrollHeight;
+  while (body.children.length > 300) body.removeChild(body.firstChild);
+}
+
+/* ── Status badge ────────────────────────────────────────────────────────── */
+function setStatus(state) {
+  const b = document.getElementById('status-badge');
+  const map = {
+    idle:    { cls:'badge-idle',    text:'IDLE'    },
+    running: { cls:'badge-running', text:'RUNNING' },
+    done:    { cls:'badge-done',    text:'DONE'    },
+    error:   { cls:'badge-error',   text:'ERROR'   },
+  };
+  const m = map[state] || map.idle;
+  b.className = 'badge ' + m.cls;
+  b.innerHTML = `<span class="badge-dot"></span> ${m.text}`;
+}
+
+/* ── Ring ────────────────────────────────────────────────────────────────── */
+function updateRing(current, target) {
+  const pct = Math.min(current / Math.max(target, 1), 1);
+  const offset = CIRC * (1 - pct);
+  document.getElementById('ring-fg').style.strokeDashoffset = offset;
+  document.getElementById('ring-fg').style.strokeDasharray = CIRC;
+  document.getElementById('ring-pct').textContent = Math.round(pct * 100) + '%';
+  document.getElementById('ring-sub').textContent = `${current.toLocaleString()} / ${target.toLocaleString()}`;
+}
+
+/* ── Speed ───────────────────────────────────────────────────────────────── */
+function updateSpeed(current) {
+  const now = Date.now();
+  const elapsed = (now - lastTime) / 60000;
+  if (elapsed > 0.08) {
+    const speed = (current - lastCount) / elapsed;
+    if (speed > 0) speedSamples.push(speed);
+    if (speedSamples.length > 6) speedSamples.shift();
+    const avg = speedSamples.reduce((a,b)=>a+b,0) / Math.max(speedSamples.length,1);
+    document.getElementById('st-speed').textContent = Math.round(avg);
+    const target = parseInt(document.getElementById('inp-target').value);
+    const rem = target - current;
+    if (avg > 0) {
+      const etaMins = rem / avg;
+      document.getElementById('st-eta').textContent = etaMins > 60
+        ? `${Math.floor(etaMins/60)}h${Math.round(etaMins%60)}m`
+        : `${Math.round(etaMins)}m`;
+    }
+    lastCount = current; lastTime = now;
+  }
+}
+
+/* ── Domain bars ─────────────────────────────────────────────────────────── */
+function updateDomainBars(counts) {
+  const total = Object.values(counts).reduce((a,b)=>a+b,0) || 1;
+  const el = document.getElementById('domain-bars');
+  if (!Object.keys(counts).length) return;
+  el.innerHTML = Object.entries(counts).map(([domain, count]) => {
+    const m = DOMAIN_META[domain] || { bar:'#7c6dfa', text:'#7c6dfa' };
+    const pct = (count / total * 100).toFixed(1);
+    return `<div class="domain-item">
+      <div class="domain-header">
+        <span class="domain-name" style="color:${m.text}">${domain}</span>
+        <span class="domain-count">${count} <span style="opacity:.5">(${pct}%)</span></span>
+      </div>
+      <div class="bar-track">
+        <div class="bar-fill" style="width:${pct}%;background:${m.bar}"></div>
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('st-domains').textContent = Object.keys(counts).length;
+}
+
+/* ── API: fetchStatus ────────────────────────────────────────────────────── */
+async function fetchStatus() {
+  try {
+    const r = await fetch('/api/status');
+    const d = await r.json();
+    const target = d.target || 1500;
+    updateRing(d.total_records, target);
+    document.getElementById('st-total').textContent = d.total_records.toLocaleString();
+    updateDomainBars(d.domain_counts || {});
+    if (!isRunning) updateSpeed(d.total_records);
+    setStatus(d.running ? 'running' : d.finished ? 'done' : d.error ? 'error' : 'idle');
+  } catch(e) {}
+}
+
+/* ── API: table ──────────────────────────────────────────────────────────── */
+async function loadTablePage(page = 1) {
+  currentPage = page;
+  const q   = document.getElementById('filter-q').value;
+  const dom = document.getElementById('filter-domain').value;
+  try {
+    const r = await fetch(`/api/preview?page=${page}&per_page=${perPage}&q=${encodeURIComponent(q)}&domain=${encodeURIComponent(dom)}`);
+    const d = await r.json();
+    totalRecords = d.total;
+    document.getElementById('total-lbl').textContent = `[${d.total.toLocaleString()} records]`;
+    renderTable(d.records);
+    renderPagination(d.total, page);
+  } catch(e) {}
+}
+
+function renderTable(records) {
+  const tbody = document.getElementById('table-body');
+  if (!records?.length) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.3"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      <p>Chưa có dữ liệu. Bắt đầu crawl để thu thập.</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = records.map(rec => {
+    const m = DOMAIN_META[rec.domain] || { bg:'rgba(100,100,120,0.15)', text:'#aaa' };
+    const snippet = (rec.document||'').slice(0,130) + ((rec.document||'').length>130?'…':'');
+    return `<tr class="fade-in">
+      <td class="td-id">#${String(rec.id).padStart(4,'0')}</td>
+      <td><span class="pill" style="background:${m.bg};color:${m.text}">${rec.domain}</span></td>
+      <td class="td-title">${esc(rec.title)}</td>
+      <td class="td-query">${esc(rec.query)}</td>
+      <td class="td-snippet">${esc(snippet)}</td>
+      <td class="td-rel"><span class="rel-badge rel-${rec.relevance||1}">${rec.relevance||1}</span></td>
+      <td class="td-url"><a href="${rec.url}" target="_blank" rel="noopener">↗</a></td>
+    </tr>`;
+  }).join('');
+}
+
+function renderPagination(total, cur) {
+  const pages = Math.ceil(total / perPage);
+  const el = document.getElementById('pagination');
+  if (pages <= 1) { el.innerHTML=''; return; }
+  const range = [];
+  for (let i = Math.max(1,cur-2); i <= Math.min(pages,cur+2); i++) range.push(i);
+  let h = `<button class="page-btn" onclick="loadTablePage(${cur-1})" ${cur<=1?'disabled':''}>‹</button>`;
+  if (range[0]>1) { h+=`<button class="page-btn" onclick="loadTablePage(1)">1</button>`; if(range[0]>2) h+=`<span class="page-info">…</span>`; }
+  range.forEach(p => h+=`<button class="page-btn${p===cur?' active':''}" onclick="loadTablePage(${p})">${p}</button>`);
+  if (range.at(-1)<pages) { if(range.at(-1)<pages-1) h+=`<span class="page-info">…</span>`; h+=`<button class="page-btn" onclick="loadTablePage(${pages})">${pages}</button>`; }
+  h += `<button class="page-btn" onclick="loadTablePage(${cur+1})" ${cur>=pages?'disabled':''}>›</button>`;
+  h += `<span class="page-info">${(cur-1)*perPage+1}–${Math.min(cur*perPage,total)} / ${total}</span>`;
+  el.innerHTML = h;
+}
+
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+/* ── SSE ─────────────────────────────────────────────────────────────────── */
+function connectSSE() {
+  if (evtSource) evtSource.close();
+  evtSource = new EventSource('/api/stream');
+
+  evtSource.onmessage = (e) => {
+    const d = JSON.parse(e.data);
+    if (d.type === 'progress') {
+      const target = parseInt(document.getElementById('inp-target').value);
+      updateRing(d.current, d.total);
+      document.getElementById('st-total').textContent = d.current.toLocaleString();
+      updateSpeed(d.current);
+      // Log as JSON every 5 records, otherwise text
+      docCount++;
+      if (docCount % 5 === 0) {
+        termLog(d.msg || `[{"id":${d.current},"total":${d.total}}]`, 'json', false);
+      } else {
+        termLog(d.msg || `Crawled ${d.current}/${d.total}`, 'ok');
+      }
+      if (d.current % 50 === 0) { fetchStatus(); loadTablePage(1); }
+
+    } else if (d.type === 'heartbeat') {
+      const target = parseInt(document.getElementById('inp-target').value);
+      if (d.progress) updateRing(d.progress, target);
+
+    } else if (d.type === 'done') {
+      termLog(`✓ DONE — ${d.current} tài liệu thu thập thành công.`, 'info');
+      setStatus('done'); isRunning = false;
+      document.getElementById('btn-start').disabled = false;
+      document.getElementById('btn-stop').disabled = true;
+      fetchStatus(); loadTablePage(1);
+      evtSource.close();
+
+    } else if (d.type === 'error') {
+      termLog(`✗ ERROR: ${d.msg}`, 'err');
+      setStatus('error'); isRunning = false;
+      document.getElementById('btn-start').disabled = false;
+      document.getElementById('btn-stop').disabled = true;
+      evtSource.close();
+    }
+  };
+
+  evtSource.onerror = () => {
+    if (isRunning) {
+      termLog('Connection lost — reconnecting in 3s...', 'warn');
+      setTimeout(connectSSE, 3000);
+    } else {
+      evtSource.close();
+    }
+  };
+}
+
+/* ── Actions ─────────────────────────────────────────────────────────────── */
+async function startCrawl() {
+  const target = parseInt(document.getElementById('inp-target').value);
+  const resume = document.getElementById('chk-resume').checked;
+  if (evtSource) { evtSource.close(); evtSource = null; }
+  document.getElementById('btn-start').disabled = true;
+  document.getElementById('btn-stop').disabled = false;
+  lastTime = Date.now(); lastCount = 0; speedSamples = []; docCount = 0;
+  termLog(`Starting crawler — target: ${target}, resume: ${resume}`, 'info');
+  setStatus('running'); isRunning = true;
+  try {
+    const r = await fetch('/api/start', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ target, resume })
+    });
+    const d = await r.json();
+    if (d.error) {
+      if (d.error === 'Already running') {
+        termLog('Session already active — attaching to stream...', 'warn');
+        connectSSE(); return;
+      }
+      termLog('Error: ' + d.error, 'err');
+      setStatus('error'); isRunning = false;
+      document.getElementById('btn-start').disabled = false;
+      document.getElementById('btn-stop').disabled = true;
+      return;
+    }
+    termLog(`Target set: ${target} docs | Wikipedia VI API`, 'sys');
+    connectSSE();
+  } catch(e) {
+    termLog('Cannot connect to server: ' + e.message, 'err');
+    setStatus('error'); isRunning = false;
+    document.getElementById('btn-start').disabled = false;
+    document.getElementById('btn-stop').disabled = true;
+  }
+}
+
+async function stopCrawl() {
+  await fetch('/api/stop', { method: 'POST' });
+  isRunning = false; setStatus('idle');
+  termLog('Crawler stopped. Data saved to dataset.json', 'warn');
+  document.getElementById('btn-start').disabled = false;
+  document.getElementById('btn-stop').disabled = true;
+  if (evtSource) evtSource.close();
+  fetchStatus();
+}
+
+function exportXLSX() { window.location.href = '/api/export/xlsx'; }
+function exportJSON()  { window.location.href = '/api/export/json'; }
+function filterAndLoad() { loadTablePage(1); }
+function debounceFilter() { clearTimeout(filterDebounce); filterDebounce = setTimeout(()=>loadTablePage(1), 400); }
+
+/* ── Init ────────────────────────────────────────────────────────────────── */
+(async () => {
+  await fetchStatus();
+  await loadTablePage(1);
+  setInterval(() => { fetchStatus(); if (!isRunning) loadTablePage(currentPage); }, 5000);
+})();
+</script>
+</body>
+</html>
