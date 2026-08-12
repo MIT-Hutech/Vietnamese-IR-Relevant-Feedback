@@ -14,6 +14,8 @@ from pathlib import Path
 from collections import defaultdict
 from typing import Optional
 
+from underthesea import text_normalize, word_tokenize
+
 # ── Stopwords tiếng Việt (basic) ────────────────────────────────────────────
 VI_STOPWORDS = {
     "và","của","là","có","được","trong","cho","với","các","những",
@@ -28,11 +30,19 @@ VI_STOPWORDS = {
 }
 
 
+_TOKEN_PATTERN = re.compile(
+    r'[a-záàảãạăắằẳẵặâấầẩẫậéèẻẽẹêếềểễệíìỉĩị'
+    r'óòỏõọôốồổỗộơớờởỡợúùủũụưứừửữựýỳỷỹỵđ0-9]+'
+    r'(?:_[a-záàảãạăắằẳẵặâấầẩẫậéèẻẽẹêếềểễệíìỉĩị'
+    r'óòỏõọôốồổỗộơớờởỡợúùủũụưứừửữựýỳỷỹỵđ0-9]+)*'
+)
+
+
 def _tokenize(text: str) -> list[str]:
-    """Basic Vietnamese tokenizer: lowercase + split on non-alpha."""
-    text = text.lower()
-    # Keep Vietnamese characters + latin + digits
-    tokens = re.findall(r'[a-záàảãạăắằẳẵặâấầẩẫậéèẻẽẹêếềểễệíìỉĩịóòỏõọôốồổỗộơớờởỡợúùủũụưứừửữựýỳỷỹỵđ0-9]+', text)
+    """Normalize and segment Vietnamese text into word-level tokens."""
+    normalized = text_normalize(text.lower())
+    segmented = word_tokenize(normalized, format="text")
+    tokens = _TOKEN_PATTERN.findall(segmented)
     return [t for t in tokens if t not in VI_STOPWORDS and len(t) > 1]
 
 

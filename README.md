@@ -17,6 +17,15 @@ python ir_app.py
 
 Mở `http://localhost:5051`.
 
+Web IR dùng Underthesea để chuẩn hóa và tách từ tiếng Việt trước khi xây dựng
+chỉ mục BM25/TF-IDF và áp dụng phản hồi liên quan Rocchio.
+
+Chạy lại benchmark so sánh tokenizer regex cũ với Underthesea:
+
+```powershell
+python benchmark_tokenizers.py
+```
+
 ## Chạy crawler local
 
 ```powershell
